@@ -2,6 +2,14 @@ const { response } = require('express');
 const express = require('express');
 
 const app = express();
+//Explicar pro express, que nossa api responde e identifica
+//informações em JSON
+
+//falar pra todas as rotas passarem no app.use primeiro
+// que nesse contexto vai converter as chamadas a json
+//usando esta funcao do express
+app.use(express.json())
+
 
 //get observa qual parametro da hospedagem queremos observar
 // ela recebe uma funcao, que recebe 2 parametros, a requisicao e a resposta.
@@ -32,16 +40,22 @@ app.get('/', (request, response) => {
  *  PUT: Atualiza uma informação do back-end
  */
 
-app.post('/projects', (request, response) =>{
-  return response.json([
-    'Projeto 1',
-    'Projeto 2',
-    'Projeto 3',
-    'Projeto 4',
-  ])
-})
+/**
+ * TIpos de parâmetros:
+ * 
+ * Query Params: Filtros e Paginação /projects?title=React&owner=Diego
+ * Route Params: Identificar recursos (Atualizar/Deletar)
+ * Request Body: COnteúdo na hora de criar ou editar um recurso (JSON)
+ */
+
 
 app.get('/projects', (request, response) =>{
+  
+  // /projects?title=React&owner=Diego
+  const {title, owner} = request.query
+  console.log(owner)
+  console.log(title)
+  
   return response.json([
     'Projeto 1',
     'Projeto 2',
@@ -49,11 +63,32 @@ app.get('/projects', (request, response) =>{
   ])
 })
 
+
 app.put('/projects/:id', (request, response) =>{
+
+  // http://localhost:3333/projects/1
+  params = request.params;
+
+  console.log(params);
+
   return response.json([
     'Projeto 4',
     'Projeto 2',
     'Projeto 3',
+  ])
+})
+
+app.post('/projects', (request, response) =>{
+
+  const body = request.body
+
+  console.log(body)
+
+  return response.json([
+    'Projeto 1',
+    'Projeto 2',
+    'Projeto 3',
+    'Projeto 4',
   ])
 })
 
@@ -63,10 +98,6 @@ app.delete('/projects/:id', (request, response) =>{
     'Projeto 3',
   ])
 })
-
-
-
-
 
 
 
