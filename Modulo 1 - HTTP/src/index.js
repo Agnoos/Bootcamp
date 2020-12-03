@@ -1,7 +1,7 @@
-const { response } = require('express');
-const express = require('express');
-
-const app = express();
+const { response } = require('express')
+const express = require('express')
+const {uuid} = require('uuidv4')
+const app = express()
 //Explicar pro express, que nossa api responde e identifica
 //informações em JSON
 
@@ -49,61 +49,113 @@ app.get('/', (request, response) => {
  */
 
 
+const projects = []
+
 app.get('/projects', (request, response) =>{
   
   // /projects?title=React&owner=Diego
-  const {title, owner} = request.query
-  console.log(owner)
-  console.log(title)
+  // const {title, owner} = request.query
+  // console.log(owner)
+  // console.log(title)
+
+  return response.json(projects)
   
-  return response.json([
-    'Projeto 1',
-    'Projeto 2',
-    'Projeto 3',
-  ])
 })
+
+app.post('/projects', (request, response) =>{
+
+  const {nome, idade, Universidade} = request.body
+  const project = { id: uuid(), nome, idade, Universidade}
+
+  projects.push(project)
+
+  return response.json(project)
+
+})
+
 
 
 app.put('/projects/:id', (request, response) =>{
 
   // http://localhost:3333/projects/1
-  params = request.params;
+  const { id } = request.params
+  const { nome, idade, Universidade} = request.body
 
-  console.log(params);
+  // Buscando o indice do projeto recebido pelo parametro
+  const projectIndex = projects.findIndex(project => project.id == id)
 
-  return response.json([
-    'Projeto 4',
-    'Projeto 2',
-    'Projeto 3',
-  ])
-})
+  //tratando erro se o projeto nao existir e alterando o codigo http
+  if (projectIndex < 0){
+    return response.status(400).json({error : "Project not found"})
+  }
 
-app.post('/projects', (request, response) =>{
+  const project = {
+    id,
+    nome,
+    idade,
+    Universidade,
+  }
 
-  const body = request.body
+  projects[projectIndex] = project
 
-  console.log(body)
+  return response.json(project)
 
-  return response.json([
-    'Projeto 1',
-    'Projeto 2',
-    'Projeto 3',
-    'Projeto 4',
-  ])
 })
 
 app.delete('/projects/:id', (request, response) =>{
-  return response.json([
-    'Projeto 2',
-    'Projeto 3',
-  ])
+
+   // http://localhost:3333/projects/1
+  const { id } = request.params
+
+  // Buscando o indice do projeto recebido pelo parametro
+  const projectIndex = projects.findIndex(project => project.id == id)
+
+  //tratando erro se o projeto nao existir e alterando o codigo http
+  if (projectIndex < 0){
+    return response.status(400).json({error : "Project not found"})
+  }
+
+  //excluindo de dentro do array de projects o indice encontrado
+  projects.splice(projectIndex, 1);
+
+  // Sem mensagem de resposta e com codigo 204, pq é vazia
+  return response.status(204).send();
+
 })
 
+app.get('/projects/:id', (request, response) =>{
+  
+  const {id} = request.params
+
+  const projectIndex = projects.findIndex(project => project.id == id)
+
+  //tratando erro se o projeto nao existir e alterando o codigo http
+  if (projectIndex < 0){
+    return response.status(400).json({error : "Project not found"})
+  }
+
+  const project = projects[projectIndex]
+
+  return response.json(project)
+  
+})
+
+app.get('/projects-filtro', (request, response) =>{
+  
+  const {nome} = request.query
+  console.log(nome)
+  const result = nome
+   ? projects.filter(project => project.nome.includes(nome))
+   : projects
+
+  return response.json(result)
+  
+})
 
 
 // listen pode recer uma outra funcao que ativa automaticamente
 // 
 app.listen(3333, () =>{
   console.log('🚀 Back-end started!')
-});
+})
 
